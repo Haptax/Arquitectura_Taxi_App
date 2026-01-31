@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { apiClient } from '../api/client';
-import type { User, UserRole } from '../api/types';
-
-const roleOptions: UserRole[] = ['client', 'driver', 'admin'];
+import type { User, UserRole, Profile } from '../api/types';
 
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [form, setForm] = useState({ name: '', email: '', role: 'client' as UserRole });
+  const [clientForm, setClientForm] = useState({ name: '', email: '' });
+  const [driverForm, setDriverForm] = useState({ name: '', email: '' });
 
   const loadUsers = async () => {
     setLoading(true);
@@ -23,12 +22,30 @@ export function UsersPage() {
     }
   };
 
-  const registerUser = async (event: React.FormEvent) => {
+  const registerWithRole = async (role: UserRole, name: string, email: string) => {
+    const user = await apiClient.post<User>('/users/register', { name, email, role });
+    await apiClient.post<Profile>('/profiles', { userId: user.id, role });
+    return user;
+  };
+
+  const registerClient = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      await apiClient.post<User>('/users/register', form);
-      setForm({ name: '', email: '', role: 'client' });
+      await registerWithRole('client', clientForm.name, clientForm.email);
+      setClientForm({ name: '', email: '' });
+      await loadUsers();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const registerDriver = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    try {
+      await registerWithRole('driver', driverForm.name, driverForm.email);
+      setDriverForm({ name: '', email: '' });
       await loadUsers();
     } catch (err) {
       setError((err as Error).message);
@@ -40,7 +57,7 @@ export function UsersPage() {
       <div className="page-header">
         <div>
           <h1>Usuarios</h1>
-          <p>Registro y listado de usuarios.</p>
+          <p>Registro rápido de clientes y conductores.</p>
         </div>
         <button type="button" className="btn" onClick={loadUsers} disabled={loading}>
           {loading ? 'Cargando...' : 'Actualizar'}
@@ -48,47 +65,61 @@ export function UsersPage() {
       </div>
 
       <div className="grid-2">
-        <form className="panel" onSubmit={registerUser}>
-          <h3>Registrar usuario</h3>
-          <label className="field">
-            Nombre
-            <input
-              value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
-              placeholder="Nombre completo"
-              required
-            />
-          </label>
-          <label className="field">
-            Email
-            <input
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm({ ...form, email: event.target.value })}
-              placeholder="correo@dominio.com"
-              required
-            />
-          </label>
-          <label className="field">
-            Rol
-            <select
-              value={form.role}
-              onChange={(event) =>
-                setForm({ ...form, role: event.target.value as UserRole })
-              }
-            >
-              {roleOptions.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="btn" type="submit">
-            Registrar
-          </button>
-          {error && <p className="error-text">{error}</p>}
-        </form>
+        <div className="panel">
+          <h3>Registrar cliente</h3>
+          <form onSubmit={registerClient}>
+            <label className="field">
+              Nombre
+              <input
+                value={clientForm.name}
+                onChange={(event) => setClientForm({ ...clientForm, name: event.target.value })}
+                placeholder="Nombre completo"
+                required
+              />
+            </label>
+            <label className="field">
+              Email
+              <input
+                type="email"
+                value={clientForm.email}
+                onChange={(event) => setClientForm({ ...clientForm, email: event.target.value })}
+                placeholder="correo@dominio.com"
+                required
+              />
+            </label>
+            <button className="btn" type="submit">
+              Registrar cliente
+            </button>
+          </form>
+        </div>
+
+        <div className="panel">
+          <h3>Registrar conductor</h3>
+          <form onSubmit={registerDriver}>
+            <label className="field">
+              Nombre
+              <input
+                value={driverForm.name}
+                onChange={(event) => setDriverForm({ ...driverForm, name: event.target.value })}
+                placeholder="Nombre completo"
+                required
+              />
+            </label>
+            <label className="field">
+              Email
+              <input
+                type="email"
+                value={driverForm.email}
+                onChange={(event) => setDriverForm({ ...driverForm, email: event.target.value })}
+                placeholder="correo@dominio.com"
+                required
+              />
+            </label>
+            <button className="btn" type="submit">
+              Registrar conductor
+            </button>
+          </form>
+        </div>
 
         <div className="panel">
           <h3>Listado</h3>
@@ -112,6 +143,7 @@ export function UsersPage() {
           )}
         </div>
       </div>
+      {error && <p className="error-text">{error}</p>}
     </section>
   );
 }

@@ -14,7 +14,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [__dirname + '/../../../../domain/entities/*.entity{.ts,.js}'],
+        entities: [__dirname + '/entities/*.orm-entity{.ts,.js}'],
         synchronize: true, // ¡OJO! En producción (Railway) esto debe ser false
         autoLoadEntities: true,
       }),

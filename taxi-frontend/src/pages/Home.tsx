@@ -7,11 +7,6 @@ const cards = [
     to: '/usuarios',
   },
   {
-    title: 'Perfiles',
-    description: 'Asignar perfiles y permisos por rol.',
-    to: '/perfiles',
-  },
-  {
     title: 'Conductores',
     description: 'Registrar conductores disponibles para viajes.',
     to: '/conductores',
