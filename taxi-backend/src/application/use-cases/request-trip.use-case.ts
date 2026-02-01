@@ -23,7 +23,7 @@ export class RequestTripUseCase {
 			dto.originLng,
 			dto.destinationLat,
 			dto.destinationLng,
-			dto.fare,
+			dto.fare ?? undefined,
 		);
 
 		const trip = new Trip(
