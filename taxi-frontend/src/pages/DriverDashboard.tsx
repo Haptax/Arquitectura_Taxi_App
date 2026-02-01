@@ -13,6 +13,7 @@ export function DriverDashboard() {
     lng: -74.072,
   });
   const [locationMessage, setLocationMessage] = useState('');
+  const [roleMessage, setRoleMessage] = useState('');
   const [confirmState, setConfirmState] = useState<{
     tripId: string;
     nearestDriverId?: string | null;
@@ -136,6 +137,21 @@ export function DriverDashboard() {
     }
   };
 
+  const changeRole = async () => {
+    setLoading(true);
+    setError('');
+    setRoleMessage('');
+    try {
+      await apiClient.post<Trip>('/users/change-role', {});
+      setRoleMessage('Rol actualizado. Recargando...');
+      setTimeout(() => window.location.reload(), 600);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadTrips();
   }, []);
@@ -160,7 +176,11 @@ export function DriverDashboard() {
           <button className="btn" type="button" onClick={updateLocation} disabled={loading}>
             {loading ? 'Guardando...' : 'Guardar ubicación'}
           </button>
+          <button className="btn secondary" type="button" onClick={changeRole} disabled={loading}>
+            Cambiar a cliente
+          </button>
           {locationMessage && <p className="muted">{locationMessage}</p>}
+          {roleMessage && <p className="muted">{roleMessage}</p>}
         </div>
         <div className="panel">
           <h3>Solicitudes pendientes</h3>

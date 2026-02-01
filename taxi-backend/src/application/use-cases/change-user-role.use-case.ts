@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '../../domain/repositories/iuser.repository';
-import type { IPasswordHasher } from '../interfaces/ipassword-hasher';
 import type { IProfileRepository } from '../../domain/repositories/iprofile.repository';
 import type { IDriverRepository } from '../../domain/repositories/idriver.repository';
 import { User, UserRole } from '../../domain/entities/user.entity';
@@ -16,30 +15,20 @@ export class ChangeUserRoleUseCase {
     private readonly profileRepository: IProfileRepository,
     @Inject('IDriverRepository')
     private readonly driverRepository: IDriverRepository,
-    @Inject('IPasswordHasher')
-    private readonly passwordHasher: IPasswordHasher,
   ) {}
 
-  async execute(userId: string, password: string): Promise<User> {
+  async execute(userId: string): Promise<User> {
     const user = await this.userRepository.findById(userId);
     if (!user || !user.passwordHash) {
       throw new Error('Usuario no encontrado');
     }
-
-    if (user.role !== UserRole.CLIENT) {
-      throw new Error('Solo clientes pueden convertirse en conductores');
-    }
-
-    const isValid = await this.passwordHasher.compare(password, user.passwordHash);
-    if (!isValid) {
-      throw new Error('Credenciales inválidas');
-    }
+    const nextRole = user.role === UserRole.DRIVER ? UserRole.CLIENT : UserRole.DRIVER;
 
     const updated = new User(
       user.id,
       user.name,
       user.email,
-      UserRole.DRIVER,
+      nextRole,
       user.isActive,
       user.passwordHash,
     );
@@ -47,7 +36,7 @@ export class ChangeUserRoleUseCase {
     await this.userRepository.save(updated);
 
     const existingProfile = await this.profileRepository.findByUserId(user.id);
-    const profile = ProfileFactory.create(user.id, UserRole.DRIVER);
+    const profile = ProfileFactory.create(user.id, nextRole);
     if (existingProfile) {
       await this.profileRepository.save({
         ...profile,
@@ -57,12 +46,16 @@ export class ChangeUserRoleUseCase {
       await this.profileRepository.save(profile);
     }
 
-    const existingDriver = await this.driverRepository.findById(user.id);
-    if (!existingDriver) {
-      const driver = new Driver(user.id, user.name, 5, 0, 0, true);
-      await this.driverRepository.save(driver);
+    if (nextRole === UserRole.DRIVER) {
+      const existingDriver = await this.driverRepository.findById(user.id);
+      if (!existingDriver) {
+        const driver = new Driver(user.id, user.name, 5, 0, 0, true);
+        await this.driverRepository.save(driver);
+      } else {
+        await this.driverRepository.updateAvailability(user.id, true);
+      }
     } else {
-      await this.driverRepository.updateAvailability(user.id, true);
+      await this.driverRepository.updateAvailability(user.id, false);
     }
 
     return new User(updated.id, updated.name, updated.email, updated.role, updated.isActive);

@@ -40,13 +40,13 @@ export class UserController {
 
   @Post('change-role')
   @UseGuards(JwtAuthGuard)
-  async changeRole(@Body() dto: ChangeRoleDto, @Req() req: Request) {
+  async changeRole(@Body() _dto: ChangeRoleDto, @Req() req: Request) {
     const userId = (req as any).user?.sub as string | undefined;
     if (!userId) {
       throw new ForbiddenException('No autorizado');
     }
 
-    const user = await this.changeUserRoleUseCase.execute(userId, dto.password);
+    const user = await this.changeUserRoleUseCase.execute(userId);
     return this.toSafeUser(user);
   }
 

@@ -8,7 +8,6 @@ export function ClientDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<Trip | null>(null);
-  const [roleForm, setRoleForm] = useState({ password: '' });
   const [roleMessage, setRoleMessage] = useState('');
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>({
     lat: 4.711,
@@ -70,21 +69,19 @@ export function ClientDashboard() {
     }
   };
 
-  const changeRole = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const changeRole = async () => {
     const user = getAuthUser();
     if (!user) return;
     setLoading(true);
     setError('');
     setRoleMessage('');
     try {
-      await apiClient.post<Trip>('/users/change-role', roleForm);
+      await apiClient.post<Trip>('/users/change-role', {});
       const auth = await apiClient.post<{ accessToken: string }>('/auth/login', {
         email: user.email,
-        password: roleForm.password,
+        password: '123456',
       });
       authToken.set(auth.accessToken);
-      setRoleForm({ password: '' });
       setRoleMessage('Rol actualizado. Recargando...');
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
@@ -175,22 +172,10 @@ export function ClientDashboard() {
           )}
           <div className="divider" />
           <h4>Convertirme en conductor</h4>
-          <form className="stack" onSubmit={changeRole}>
-            <label className="field">
-              Password
-              <input
-                type="password"
-                value={roleForm.password}
-                onChange={(event) => setRoleForm({ password: event.target.value })}
-                placeholder="Tu contraseña"
-                required
-              />
-            </label>
-            <button className="btn" type="submit" disabled={loading}>
-              Cambiar a conductor
-            </button>
-            {roleMessage && <p className="muted">{roleMessage}</p>}
-          </form>
+          <button className="btn" type="button" onClick={changeRole} disabled={loading}>
+            Cambiar a conductor
+          </button>
+          {roleMessage && <p className="muted">{roleMessage}</p>}
           {error && <p className="error-text">{error}</p>}
         </div>
       </div>
