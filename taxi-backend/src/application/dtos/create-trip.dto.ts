@@ -15,7 +15,7 @@ export class CreateTripDto {
 	@Type(() => Number)
 	@IsNumber()
 	@Min(0)
-	fare?: number;
+	fare?: number | null;
 
 	@IsOptional()
 	@Type(() => Number)
