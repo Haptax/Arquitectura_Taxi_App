@@ -77,12 +77,8 @@ export function ClientDashboard() {
     setRoleMessage('');
     try {
       await apiClient.post<Trip>('/users/change-role', {});
-      const auth = await apiClient.post<{ accessToken: string }>('/auth/login', {
-        email: user.email,
-        password: '123456',
-      });
-      authToken.set(auth.accessToken);
-      setRoleMessage('Rol actualizado. Recargando...');
+      authToken.clear();
+      setRoleMessage('Rol actualizado. Inicia sesión de nuevo.');
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
       setError((err as Error).message);

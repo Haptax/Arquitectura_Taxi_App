@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiClient, getAuthUser } from '../api/client';
+import { apiClient, authToken, getAuthUser } from '../api/client';
 import type { Trip, User, Driver } from '../api/types';
 import { MapPicker } from '../components/MapPicker';
 
@@ -143,7 +143,8 @@ export function DriverDashboard() {
     setRoleMessage('');
     try {
       await apiClient.post<Trip>('/users/change-role', {});
-      setRoleMessage('Rol actualizado. Recargando...');
+      authToken.clear();
+      setRoleMessage('Rol actualizado. Inicia sesión de nuevo.');
       setTimeout(() => window.location.reload(), 600);
     } catch (err) {
       setError((err as Error).message);
