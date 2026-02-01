@@ -9,6 +9,7 @@ async function bootstrap() {
       'http://localhost:5173',
       'http://localhost:5174',
       'http://localhost:3000',
+      'https://arquitectura-taxi-app-1.onrender.com',
     ],
     credentials: false,
   });
