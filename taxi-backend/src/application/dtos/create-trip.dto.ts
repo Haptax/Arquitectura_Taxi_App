@@ -11,10 +11,11 @@ export class CreateTripDto {
 	@IsString()
 	destination: string;
 
+	@IsOptional()
 	@Type(() => Number)
 	@IsNumber()
 	@Min(0)
-	fare: number;
+	fare?: number;
 
 	@IsOptional()
 	@Type(() => Number)

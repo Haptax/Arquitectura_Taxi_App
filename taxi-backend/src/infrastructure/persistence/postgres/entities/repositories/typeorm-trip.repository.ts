@@ -20,6 +20,7 @@ export class TypeOrmTripRepository implements ITripRepository {
       destination: trip.destination,
       fare: trip.fare,
       status: trip.status,
+      paid: trip.paid,
       driverId: trip.driverId,
       offerDriverId: trip.offerDriverId,
       originLat: trip.originLat,
@@ -48,6 +49,7 @@ export class TypeOrmTripRepository implements ITripRepository {
       trip.originLng,
       trip.destinationLat,
       trip.destinationLng,
+      trip.paid,
     );
   }
   
@@ -68,6 +70,7 @@ export class TypeOrmTripRepository implements ITripRepository {
           trip.originLng,
           trip.destinationLat,
           trip.destinationLng,
+          trip.paid,
         ),
     );
   }
@@ -89,6 +92,7 @@ export class TypeOrmTripRepository implements ITripRepository {
           trip.originLng,
           trip.destinationLat,
           trip.destinationLng,
+          trip.paid,
         ),
     );
   }
@@ -110,6 +114,7 @@ export class TypeOrmTripRepository implements ITripRepository {
           trip.originLng,
           trip.destinationLat,
           trip.destinationLng,
+          trip.paid,
         ),
     );
   }

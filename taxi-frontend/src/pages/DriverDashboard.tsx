@@ -205,6 +205,8 @@ export function DriverDashboard() {
                 <p><strong>Cliente:</strong> {getClientName(trip.clientId)}</p>
                 <p><strong>Origen:</strong> {trip.origin}</p>
                 <p><strong>Destino:</strong> {trip.destination}</p>
+                <p><strong>Tarifa:</strong> {trip.fare.toFixed(2)}</p>
+                <p><strong>Pagado:</strong> {trip.paid ? 'Sí' : 'No'}</p>
                 <button className="btn" type="button" onClick={() => completeTrip(trip.id)}>
                   Marcar atendido
                 </button>

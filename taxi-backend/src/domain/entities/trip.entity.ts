@@ -20,6 +20,7 @@ export class Trip {
     public originLng?: number,
     public destinationLat?: number,
     public destinationLng?: number,
+    public paid: boolean = false,
   ) {}
 
   assignDriver(driverId: string) {

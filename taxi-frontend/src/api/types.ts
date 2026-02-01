@@ -35,6 +35,7 @@ export type Trip = {
   status: TripStatus;
   driverId?: string;
   offerDriverId?: string;
+  paid?: boolean;
   originLat?: number;
   originLng?: number;
   destinationLat?: number;

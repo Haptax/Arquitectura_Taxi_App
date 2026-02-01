@@ -56,7 +56,6 @@ export function ClientDashboard() {
         clientId: user.sub,
         origin: 'Origen demo',
         destination: 'Destino demo',
-        fare: 12.5,
         originLat: origin?.lat ?? 4.711,
         originLng: origin?.lng ?? -74.071,
         destinationLat: destination?.lat ?? 4.72,
@@ -147,6 +146,8 @@ export function ClientDashboard() {
               <p><strong>ID:</strong> {result.id}</p>
               <p><strong>Estado:</strong> {result.status}</p>
               <p><strong>Conductor:</strong> {result.driverId ?? 'Sin asignar'}</p>
+              <p><strong>Tarifa:</strong> {result.fare.toFixed(2)}</p>
+              <p><strong>Pagado:</strong> {result.paid ? 'Sí' : 'No'}</p>
             </div>
           )}
           {result && (

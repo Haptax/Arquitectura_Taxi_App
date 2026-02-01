@@ -18,12 +18,20 @@ export class RequestTripUseCase {
 	) {}
 
 	async execute(dto: CreateTripDto): Promise<Trip> {
+		const fare = this.calculateFare(
+			dto.originLat,
+			dto.originLng,
+			dto.destinationLat,
+			dto.destinationLng,
+			dto.fare,
+		);
+
 		const trip = new Trip(
 			uuidv4(),
 			dto.clientId,
 			dto.origin,
 			dto.destination,
-			dto.fare,
+			fare,
 			undefined,
 			undefined,
 			undefined,
@@ -36,5 +44,28 @@ export class RequestTripUseCase {
 		await this.tripRepository.save(trip);
 
 		return trip;
+	}
+
+	private calculateFare(
+		originLat?: number,
+		originLng?: number,
+		destLat?: number,
+		destLng?: number,
+		fallbackFare?: number,
+	): number {
+		if (
+			originLat == null ||
+			originLng == null ||
+			destLat == null ||
+			destLng == null
+		) {
+			return fallbackFare ?? 10;
+		}
+
+		const distance = Math.hypot(originLat - destLat, originLng - destLng);
+		const baseFare = 3;
+		const perKm = 8;
+		const km = distance * 111;
+		return Math.max(baseFare + km * perKm, baseFare);
 	}
 }

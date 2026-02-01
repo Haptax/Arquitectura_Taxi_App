@@ -22,6 +22,7 @@ export class CompleteTripUseCase {
     }
 
     trip.status = TripStatus.COMPLETED;
+    trip.paid = true;
     await this.tripRepository.save(trip);
     await this.driverRepository.updateAvailability(driverId, true);
 

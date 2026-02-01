@@ -25,6 +25,9 @@ export class TripOrmEntity {
   })
   status: TripStatus;
 
+  @Column({ default: false })
+  paid: boolean;
+
   @Column({ nullable: true })
   driverId?: string;
 
