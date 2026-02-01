@@ -19,6 +19,20 @@ export function ClientDashboard() {
     lng: -74.08,
   });
 
+  const getNearestDrivers = () => {
+    if (!origin) return [];
+    return [...drivers]
+      .map((driver) => ({
+        driver,
+        distance: Math.hypot(
+          (driver.currentLat ?? 0) - origin.lat,
+          (driver.currentLng ?? 0) - origin.lng,
+        ),
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5);
+  };
+
   const loadDrivers = async () => {
     setLoading(true);
     setError('');
@@ -133,6 +147,29 @@ export function ClientDashboard() {
               <p><strong>ID:</strong> {result.id}</p>
               <p><strong>Estado:</strong> {result.status}</p>
               <p><strong>Conductor:</strong> {result.driverId ?? 'Sin asignar'}</p>
+            </div>
+          )}
+          {result && (
+            <div className="result-card">
+              <h4>Conductores más cercanos</h4>
+              {getNearestDrivers().length === 0 ? (
+                <p className="muted">No hay conductores cercanos.</p>
+              ) : (
+                <div className="table">
+                  <div className="table-header">
+                    <span>Nombre</span>
+                    <span>Distancia</span>
+                    <span>Estado</span>
+                  </div>
+                  {getNearestDrivers().map(({ driver, distance }) => (
+                    <div key={driver.id} className="table-row">
+                      <span>{driver.name}</span>
+                      <span>{distance.toFixed(4)}</span>
+                      <span>{driver.isAvailable ? 'Disponible' : 'Ocupado'}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           <div className="divider" />
