@@ -46,6 +46,23 @@ export function AdminDashboard() {
     return trips.filter((trip) => trip.status === statusFilter);
   }, [trips, statusFilter]);
 
+  const totalRevenue = useMemo(() => {
+    return trips.reduce((sum, trip) => sum + (trip.fare || 0), 0);
+  }, [trips]);
+
+  const totalPaidRevenue = useMemo(() => {
+    return trips.reduce((sum, trip) => sum + (trip.paid ? trip.fare || 0 : 0), 0);
+  }, [trips]);
+
+  const earningsByDriver = useMemo(() => {
+    const map = new Map<string, number>();
+    trips.forEach((trip) => {
+      if (!trip.driverId || !trip.paid) return;
+      map.set(trip.driverId, (map.get(trip.driverId) ?? 0) + (trip.fare || 0));
+    });
+    return map;
+  }, [trips]);
+
   const getUserName = (userId?: string | null) => {
     if (!userId) return 'Sin asignar';
     const user = users.find((item) => item.id === userId);
@@ -73,6 +90,13 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid-2">
+        <div className="panel">
+          <h3>Totales</h3>
+          <div className="result-card">
+            <p><strong>Tarifas totales:</strong> {totalRevenue.toFixed(2)}</p>
+            <p><strong>Tarifas pagadas:</strong> {totalPaidRevenue.toFixed(2)}</p>
+          </div>
+        </div>
         <div className="panel">
           <h3>Usuarios</h3>
           {users.length === 0 ? (
@@ -116,6 +140,26 @@ export function AdminDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="panel">
+        <h3>Ganancias por conductor (pagadas)</h3>
+        {drivers.length === 0 ? (
+          <p className="muted">Sin conductores.</p>
+        ) : (
+          <div className="table">
+            <div className="table-header">
+              <span>Conductor</span>
+              <span>Total</span>
+            </div>
+            {drivers.map((driver) => (
+              <div key={driver.id} className="table-row">
+                <span>{driver.name}</span>
+                <span>{(earningsByDriver.get(driver.id) ?? 0).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="panel">
