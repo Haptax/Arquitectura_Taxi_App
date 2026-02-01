@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { apiClient } from '../api/client';
-import type { User, UserRole, Profile } from '../api/types';
+import type { User, Profile } from '../api/types';
 
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [clientForm, setClientForm] = useState({ name: '', email: '' });
-  const [driverForm, setDriverForm] = useState({ name: '', email: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [roleForm, setRoleForm] = useState({ password: '' });
 
   const loadUsers = async () => {
     setLoading(true);
@@ -22,30 +22,29 @@ export function UsersPage() {
     }
   };
 
-  const registerWithRole = async (role: UserRole, name: string, email: string) => {
-    const user = await apiClient.post<User>('/users/register', { name, email, role });
-    await apiClient.post<Profile>('/profiles', { userId: user.id, role });
-    return user;
-  };
-
-  const registerClient = async (event: React.FormEvent) => {
+  const registerUser = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      await registerWithRole('client', clientForm.name, clientForm.email);
-      setClientForm({ name: '', email: '' });
+      const user = await apiClient.post<User>('/users/register', {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+      await apiClient.post<Profile>('/profiles', { userId: user.id, role: 'client' });
+      setForm({ name: '', email: '', password: '' });
       await loadUsers();
     } catch (err) {
       setError((err as Error).message);
     }
   };
 
-  const registerDriver = async (event: React.FormEvent) => {
+  const changeRole = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      await registerWithRole('driver', driverForm.name, driverForm.email);
-      setDriverForm({ name: '', email: '' });
+      await apiClient.post<User>('/users/change-role', roleForm);
+      setRoleForm({ password: '' });
       await loadUsers();
     } catch (err) {
       setError((err as Error).message);
@@ -66,13 +65,13 @@ export function UsersPage() {
 
       <div className="grid-2">
         <div className="panel">
-          <h3>Registrar cliente</h3>
-          <form onSubmit={registerClient}>
+          <h3>Registrar usuario (cliente)</h3>
+          <form onSubmit={registerUser}>
             <label className="field">
               Nombre
               <input
-                value={clientForm.name}
-                onChange={(event) => setClientForm({ ...clientForm, name: event.target.value })}
+                value={form.name}
+                onChange={(event) => setForm({ ...form, name: event.target.value })}
                 placeholder="Nombre completo"
                 required
               />
@@ -81,42 +80,43 @@ export function UsersPage() {
               Email
               <input
                 type="email"
-                value={clientForm.email}
-                onChange={(event) => setClientForm({ ...clientForm, email: event.target.value })}
+                value={form.email}
+                onChange={(event) => setForm({ ...form, email: event.target.value })}
                 placeholder="correo@dominio.com"
                 required
               />
             </label>
+            <label className="field">
+              Password
+              <input
+                type="password"
+                value={form.password}
+                onChange={(event) => setForm({ ...form, password: event.target.value })}
+                placeholder="********"
+                required
+              />
+            </label>
             <button className="btn" type="submit">
-              Registrar cliente
+              Registrar usuario
             </button>
           </form>
         </div>
 
         <div className="panel">
-          <h3>Registrar conductor</h3>
-          <form onSubmit={registerDriver}>
+          <h3>Convertirme en conductor</h3>
+          <form onSubmit={changeRole}>
             <label className="field">
-              Nombre
+              Password
               <input
-                value={driverForm.name}
-                onChange={(event) => setDriverForm({ ...driverForm, name: event.target.value })}
-                placeholder="Nombre completo"
-                required
-              />
-            </label>
-            <label className="field">
-              Email
-              <input
-                type="email"
-                value={driverForm.email}
-                onChange={(event) => setDriverForm({ ...driverForm, email: event.target.value })}
-                placeholder="correo@dominio.com"
+                type="password"
+                value={roleForm.password}
+                onChange={(event) => setRoleForm({ password: event.target.value })}
+                placeholder="Tu contraseña"
                 required
               />
             </label>
             <button className="btn" type="submit">
-              Registrar conductor
+              Cambiar a conductor
             </button>
           </form>
         </div>

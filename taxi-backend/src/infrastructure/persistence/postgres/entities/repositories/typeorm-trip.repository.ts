@@ -21,6 +21,7 @@ export class TypeOrmTripRepository implements ITripRepository {
       fare: trip.fare,
       status: trip.status,
       driverId: trip.driverId,
+      offerDriverId: trip.offerDriverId,
       originLat: trip.originLat,
       originLng: trip.originLng,
       destinationLat: trip.destinationLat,
@@ -42,10 +43,74 @@ export class TypeOrmTripRepository implements ITripRepository {
       trip.fare,
       trip.status,
       trip.driverId,
+      trip.offerDriverId,
       trip.originLat,
       trip.originLng,
       trip.destinationLat,
       trip.destinationLng,
+    );
+  }
+  
+  async findAll(): Promise<Trip[]> {
+    const trips = await this.ormRepository.find();
+    return trips.map(
+      (trip) =>
+        new Trip(
+          trip.id,
+          trip.clientId,
+          trip.origin,
+          trip.destination,
+          trip.fare,
+          trip.status,
+          trip.driverId,
+          trip.offerDriverId,
+          trip.originLat,
+          trip.originLng,
+          trip.destinationLat,
+          trip.destinationLng,
+        ),
+    );
+  }
+  
+  async findByStatus(status: Trip['status']): Promise<Trip[]> {
+    const trips = await this.ormRepository.find({ where: { status } });
+    return trips.map(
+      (trip) =>
+        new Trip(
+          trip.id,
+          trip.clientId,
+          trip.origin,
+          trip.destination,
+          trip.fare,
+          trip.status,
+          trip.driverId,
+          trip.offerDriverId,
+          trip.originLat,
+          trip.originLng,
+          trip.destinationLat,
+          trip.destinationLng,
+        ),
+    );
+  }
+  
+  async findByDriverId(driverId: string): Promise<Trip[]> {
+    const trips = await this.ormRepository.find({ where: { driverId } });
+    return trips.map(
+      (trip) =>
+        new Trip(
+          trip.id,
+          trip.clientId,
+          trip.origin,
+          trip.destination,
+          trip.fare,
+          trip.status,
+          trip.driverId,
+          trip.offerDriverId,
+          trip.originLat,
+          trip.originLng,
+          trip.destinationLat,
+          trip.destinationLng,
+        ),
     );
   }
 }

@@ -21,4 +21,7 @@ export class UserOrmEntity {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ name: 'password_hash', nullable: true })
+  passwordHash?: string;
 }

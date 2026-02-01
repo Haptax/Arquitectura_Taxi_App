@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { apiClient } from '../api/client';
 import type { Profile, UserRole } from '../api/types';
 
-const roleOptions: UserRole[] = ['client', 'driver', 'admin'];
+const roleOptions: UserRole[] = ['client', 'driver'];
 
 export function ProfilesPage() {
   const [result, setResult] = useState<Profile | null>(null);

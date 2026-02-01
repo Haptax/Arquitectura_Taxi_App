@@ -6,7 +6,7 @@ export class UserFactory {
    * Crea un nuevo usuario con la lógica inicial según su rol.
    * Esto centraliza la creación y evita errores de instanciación en los Casos de Uso.
    */
-  static create(name: string, email: string, role: UserRole): User {
+  static create(name: string, email: string, role: UserRole, passwordHash?: string): User {
     // Generamos un ID único (en una arquitectura pura, el ID puede venir del dominio o la DB)
     const id = uuidv4();
 
@@ -17,14 +17,14 @@ export class UserFactory {
     switch (role) {
       case UserRole.DRIVER:
         // Lógica específica para conductores si fuera necesario
-        return new User(id, name, email, UserRole.DRIVER, true);
+        return new User(id, name, email, UserRole.DRIVER, true, passwordHash);
       
       case UserRole.ADMIN:
-        return new User(id, name, email, UserRole.ADMIN, true);
+        return new User(id, name, email, UserRole.ADMIN, true, passwordHash);
       
       case UserRole.CLIENT:
       default:
-        return new User(id, name, email, UserRole.CLIENT, true);
+        return new User(id, name, email, UserRole.CLIENT, true, passwordHash);
     }
   }
 }

@@ -1,19 +1,20 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { authToken, getAuthUser } from '../api/client';
 
 const links = [
-  { to: '/', label: 'Inicio' },
-  { to: '/usuarios', label: 'Usuarios' },
-  { to: '/conductores', label: 'Conductores' },
-  { to: '/viajes', label: 'Viajes' },
+  { to: '/', label: 'Dashboard' },
 ];
 
 export function Layout() {
+  const user = getAuthUser();
   return (
     <div className="app-shell">
       <header className="app-header">
         <div>
           <p className="app-title">Taxi Manager</p>
-          <p className="app-subtitle">Panel local de pruebas</p>
+          <p className="app-subtitle">
+            {user ? `Sesión: ${user.email} (${user.role})` : 'Panel local de pruebas'}
+          </p>
         </div>
         <nav className="app-nav">
           {links.map((link) => (
@@ -27,6 +28,16 @@ export function Layout() {
               {link.label}
             </NavLink>
           ))}
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => {
+              authToken.clear();
+              window.location.href = '/';
+            }}
+          >
+            Salir
+          </button>
         </nav>
       </header>
       <main className="app-main">

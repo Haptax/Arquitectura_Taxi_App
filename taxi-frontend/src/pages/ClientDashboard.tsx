@@ -1,0 +1,161 @@
+import { useEffect, useState } from 'react';
+import { apiClient, authToken, getAuthUser } from '../api/client';
+import type { Driver, Trip } from '../api/types';
+import { MapPicker } from '../components/MapPicker';
+
+export function ClientDashboard() {
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [result, setResult] = useState<Trip | null>(null);
+  const [roleForm, setRoleForm] = useState({ password: '' });
+  const [roleMessage, setRoleMessage] = useState('');
+  const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>({
+    lat: 4.711,
+    lng: -74.071,
+  });
+  const [destination, setDestination] = useState<{ lat: number; lng: number } | null>({
+    lat: 4.72,
+    lng: -74.08,
+  });
+
+  const loadDrivers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiClient.get<Driver[]>('/drivers?available=true');
+      setDrivers(data);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const requestTrip = async () => {
+    const user = getAuthUser();
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const trip = await apiClient.post<Trip>('/trips/request', {
+        clientId: user.sub,
+        origin: 'Origen demo',
+        destination: 'Destino demo',
+        fare: 12.5,
+        originLat: origin?.lat ?? 4.711,
+        originLng: origin?.lng ?? -74.071,
+        destinationLat: destination?.lat ?? 4.72,
+        destinationLng: destination?.lng ?? -74.08,
+      });
+      setResult(trip);
+      await loadDrivers();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changeRole = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const user = getAuthUser();
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    setRoleMessage('');
+    try {
+      await apiClient.post<Trip>('/users/change-role', roleForm);
+      const auth = await apiClient.post<{ accessToken: string }>('/auth/login', {
+        email: user.email,
+        password: roleForm.password,
+      });
+      authToken.set(auth.accessToken);
+      setRoleForm({ password: '' });
+      setRoleMessage('Rol actualizado. Recargando...');
+      setTimeout(() => window.location.reload(), 600);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDrivers();
+  }, []);
+
+  return (
+    <section>
+      <div className="page-header">
+        <div>
+          <h1>Cliente</h1>
+          <p>Conductores disponibles y solicitud rápida de viaje.</p>
+        </div>
+        <button className="btn" type="button" onClick={loadDrivers} disabled={loading}>
+          {loading ? 'Actualizando...' : 'Actualizar conductores'}
+        </button>
+      </div>
+
+      <div className="grid-2">
+        <div className="panel">
+          <h3>Conductores disponibles</h3>
+          {drivers.length === 0 ? (
+            <p className="muted">No hay conductores disponibles.</p>
+          ) : (
+            <div className="table">
+              <div className="table-header">
+                <span>Nombre</span>
+                <span>Rating</span>
+                <span>Estado</span>
+              </div>
+              {drivers.map((driver) => (
+                <div key={driver.id} className="table-row">
+                  <span>{driver.name}</span>
+                  <span>{driver.rating}</span>
+                  <span>{driver.isAvailable ? 'Disponible' : 'Ocupado'}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="panel">
+          <h3>Solicitar transporte</h3>
+          <p>Usa coordenadas demo por ahora.</p>
+          <MapPicker label="Origen" value={origin} onChange={setOrigin} />
+          <MapPicker label="Destino" value={destination} onChange={setDestination} />
+          <button className="btn" type="button" onClick={requestTrip} disabled={loading}>
+            {loading ? 'Solicitando...' : 'Solicitar'}
+          </button>
+          {result && (
+            <div className="result-card">
+              <p><strong>ID:</strong> {result.id}</p>
+              <p><strong>Estado:</strong> {result.status}</p>
+              <p><strong>Conductor:</strong> {result.driverId ?? 'Sin asignar'}</p>
+            </div>
+          )}
+          <div className="divider" />
+          <h4>Convertirme en conductor</h4>
+          <form className="stack" onSubmit={changeRole}>
+            <label className="field">
+              Password
+              <input
+                type="password"
+                value={roleForm.password}
+                onChange={(event) => setRoleForm({ password: event.target.value })}
+                placeholder="Tu contraseña"
+                required
+              />
+            </label>
+            <button className="btn" type="submit" disabled={loading}>
+              Cambiar a conductor
+            </button>
+            {roleMessage && <p className="muted">{roleMessage}</p>}
+          </form>
+          {error && <p className="error-text">{error}</p>}
+        </div>
+      </div>
+    </section>
+  );
+}

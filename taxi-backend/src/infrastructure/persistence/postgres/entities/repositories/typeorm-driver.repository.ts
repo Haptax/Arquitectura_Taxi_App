@@ -40,6 +40,21 @@ export class TypeOrmDriverRepository implements IDriverRepository {
     );
   }
 
+  async findAll(): Promise<Driver[]> {
+    const drivers = await this.ormRepository.find();
+    return drivers.map(
+      (driver) =>
+        new Driver(
+          driver.id,
+          driver.name,
+          driver.rating,
+          driver.currentLat,
+          driver.currentLng,
+          driver.isAvailable,
+        ),
+    );
+  }
+
   async findById(id: string): Promise<Driver | null> {
     const driver = await this.ormRepository.findOne({ where: { id } });
     if (!driver) return null;
@@ -56,5 +71,9 @@ export class TypeOrmDriverRepository implements IDriverRepository {
 
   async updateAvailability(id: string, isAvailable: boolean): Promise<void> {
     await this.ormRepository.update({ id }, { isAvailable });
+  }
+
+  async updateLocation(id: string, currentLat: number, currentLng: number): Promise<void> {
+    await this.ormRepository.update({ id }, { currentLat, currentLng });
   }
 }

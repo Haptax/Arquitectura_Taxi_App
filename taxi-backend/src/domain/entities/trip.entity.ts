@@ -15,6 +15,7 @@ export class Trip {
     public readonly fare: number,
     public status: TripStatus = TripStatus.REQUESTED,
     public driverId?: string,
+    public offerDriverId?: string,
     public originLat?: number,
     public originLng?: number,
     public destinationLat?: number,
@@ -24,5 +25,10 @@ export class Trip {
   assignDriver(driverId: string) {
     this.driverId = driverId;
     this.status = TripStatus.ASSIGNED;
+  }
+
+  offerTo(driverId: string) {
+    this.offerDriverId = driverId;
+    this.status = TripStatus.REQUESTED;
   }
 }

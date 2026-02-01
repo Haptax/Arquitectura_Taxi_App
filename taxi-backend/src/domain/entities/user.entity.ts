@@ -11,5 +11,6 @@ export class User {
     public readonly email: string,
     public readonly role: UserRole,
     public readonly isActive: boolean = true,
+    public readonly passwordHash?: string,
   ) {}
 }

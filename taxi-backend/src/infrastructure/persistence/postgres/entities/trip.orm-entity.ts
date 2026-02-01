@@ -28,6 +28,9 @@ export class TripOrmEntity {
   @Column({ nullable: true })
   driverId?: string;
 
+  @Column({ nullable: true })
+  offerDriverId?: string;
+
   @Column({ type: 'float', nullable: true })
   originLat?: number;
 

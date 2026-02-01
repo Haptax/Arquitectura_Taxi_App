@@ -1,4 +1,5 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { UserRole } from '../../domain/entities/user.entity';
 
 export class RegisterUserDto {
@@ -9,6 +10,12 @@ export class RegisterUserDto {
   @IsEmail()
   email: string;
 
+  @IsString()
+  @MinLength(6)
+  password: string;
+
   @IsEnum(UserRole)
-  role: UserRole;
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  role?: UserRole;
 }

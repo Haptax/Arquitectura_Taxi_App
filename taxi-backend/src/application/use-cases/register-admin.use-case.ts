@@ -1,12 +1,12 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { RegisterUserDto } from '../dtos/register-user.dto';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserFactory } from '../../domain/factories/user.factory';
 import type { IUserRepository } from '../../domain/repositories/iuser.repository';
 import { User, UserRole } from '../../domain/entities/user.entity';
 import type { IPasswordHasher } from '../interfaces/ipassword-hasher';
+import { RegisterAdminDto } from '../dtos/register-admin.dto';
 
 @Injectable()
-export class RegisterUserUseCase {
+export class RegisterAdminUseCase {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
@@ -14,21 +14,14 @@ export class RegisterUserUseCase {
     private readonly passwordHasher: IPasswordHasher,
   ) {}
 
-  async execute(dto: RegisterUserDto): Promise<User> {
-    if (dto.role === UserRole.ADMIN) {
-      throw new Error('No está permitido registrar administradores desde este endpoint');
-    }
-    // 1. Validar si el usuario ya existe
+  async execute(dto: RegisterAdminDto): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new Error('El usuario con este correo ya existe');
     }
 
-    // 2. Hashear password y crear entidad de dominio
     const passwordHash = await this.passwordHasher.hash(dto.password);
-    const newUser = UserFactory.create(dto.name, dto.email, UserRole.CLIENT, passwordHash);
-
-    // 3. Usar el PATRÓN REPOSITORY para persistir 
+    const newUser = UserFactory.create(dto.name, dto.email, UserRole.ADMIN, passwordHash);
     await this.userRepository.save(newUser);
 
     return new User(newUser.id, newUser.name, newUser.email, newUser.role, newUser.isActive);

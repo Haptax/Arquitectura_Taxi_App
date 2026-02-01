@@ -1,18 +1,30 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { useState } from 'react';
 import { Layout } from './components/Layout';
-import { Home } from './pages/Home';
-import { UsersPage } from './pages/UsersPage';
-import { DriversPage } from './pages/DriversPage';
-import { TripsPage } from './pages/TripsPage';
+import { LoginPage } from './pages/LoginPage';
+import { ClientDashboard } from './pages/ClientDashboard';
+import { DriverDashboard } from './pages/DriverDashboard';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { getAuthUser } from './api/client';
 
 function App() {
+  const [authTick, setAuthTick] = useState(0);
+  const user = getAuthUser();
+
+  if (!user) {
+    return <LoginPage onAuth={() => setAuthTick(authTick + 1)} />;
+  }
+
+  const dashboard = user.role === 'admin'
+    ? <AdminDashboard />
+    : user.role === 'driver'
+      ? <DriverDashboard />
+      : <ClientDashboard />;
+
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="usuarios" element={<UsersPage />} />
-        <Route path="conductores" element={<DriversPage />} />
-        <Route path="viajes" element={<TripsPage />} />
+        <Route index element={dashboard} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
