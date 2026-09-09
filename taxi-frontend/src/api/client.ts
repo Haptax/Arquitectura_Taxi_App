@@ -52,7 +52,20 @@ async function request<T>(path: string, options: RequestOptions): Promise<T> {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `Request failed with status ${response.status}`);
+    let message = `Error (${response.status})`;
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed.message)) {
+        message = parsed.message.join(', ');
+      } else if (parsed.message) {
+        message = parsed.message;
+      } else {
+        message = text || message;
+      }
+    } catch {
+      message = text || message;
+    }
+    throw new Error(message);
   }
 
   return response.json() as Promise<T>;

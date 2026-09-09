@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, ForbiddenException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, ForbiddenException, BadRequestException, Req } from '@nestjs/common';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import { RegisterUserDto } from '../../application/dtos/register-user.dto';
 import { ListUsersUseCase } from '../../application/use-cases/list-users.use-case';
@@ -21,8 +21,12 @@ export class UserController {
 
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
-    const user = await this.registerUserUseCase.execute(registerUserDto);
-    return this.toSafeUser(user);
+    try {
+      const user = await this.registerUserUseCase.execute(registerUserDto);
+      return this.toSafeUser(user);
+    } catch (error: any) {
+      throw new BadRequestException(error.message || 'Error al registrar usuario');
+    }
   }
 
   @Get()
@@ -34,8 +38,12 @@ export class UserController {
 
   @Post('admin/register')
   async registerAdmin(@Body() dto: RegisterAdminDto) {
-    const user = await this.registerAdminUseCase.execute(dto);
-    return this.toSafeUser(user);
+    try {
+      const user = await this.registerAdminUseCase.execute(dto);
+      return this.toSafeUser(user);
+    } catch (error: any) {
+      throw new BadRequestException(error.message || 'Error al registrar administrador');
+    }
   }
 
   @Post('change-role')
